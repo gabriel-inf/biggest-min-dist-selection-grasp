@@ -62,8 +62,9 @@ def grasp(d, l, inst, interactions):
             S[:] = s[:]
             logging.info('{} - {} - {}'.format(it, f, int(cronometro.time()-start)))
         print("it. {}: bv: {} - seconds execution: {}...".format(it, f, int(cronometro.time()-start)))
-    logging.info("TOTAL TIME: {} ".format(int(cronometro.time()-start)))
         it += 1
+    logging.info("TOTAL TIME: {} ".format(int(cronometro.time()-start)))
+
     return S, f
 
 
