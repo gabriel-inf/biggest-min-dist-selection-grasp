@@ -1,0 +1,19 @@
+INFO:root:GRASP ITERATIONS: 10 
+INFO:root:Instância: /home/gabriel/git/biggest-min-dist-selection-grasp/instances/mdmt39.112.A.ins 
+INFO:root:SOLUCOES_GULOSAS: 100 
+INFO:root:ALPHA: 0.5 
+INFO:root:LOCAL_SEARCH_CRITERIA: 10 
+INFO:root:NUM_VIZINHOS: 8 
+INFO:root:0 - 3632 - 5
+INFO:root:1 - 3632 - 10
+INFO:root:2 - 3632 - 15
+INFO:root:3 - 3655 - 20
+INFO:root:4 - 3655 - 26
+INFO:root:5 - 3655 - 30
+INFO:root:6 - 3655 - 37
+INFO:root:7 - 3655 - 41
+INFO:root:8 - 3655 - 46
+INFO:root:9 - 3659 - 51
+INFO:root:Best solution quality: 3659 
+ Agent: 
+ [204, 285, 103, 340, 274, 87, 183, 272, 221, 8, 440, 345, 96, 447, 367, 389, 39, 26, 51, 108, 152, 176, 368, 270, 123, 281, 235, 341, 424, 256, 174, 0, 329, 155, 146, 60, 97, 75, 320, 396, 318, 237, 413, 441, 426, 414, 80, 151, 434, 25, 279, 43, 317, 119, 61, 337, 45, 150, 238, 89, 69, 27, 1, 233, 257, 5, 448, 220, 348, 410, 109, 10, 202, 296, 28, 35, 3, 255, 327, 166, 363, 284, 375, 231, 162, 216, 444, 261, 313, 219, 379, 192, 346, 295, 429, 333, 128, 278, 212, 164, 38, 401, 49, 153, 311, 267, 252, 85, 405, 232, 431, 395]

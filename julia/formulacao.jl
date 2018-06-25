@@ -34,29 +34,25 @@ for i = 1:M
 end
 
 
+model = Model(solver=GLPKSolverMIP(tm_lim=60000))
 
-model = Model(solver=GLPKSolverMIP(tm_lim=600000, out_frq=100))
-
+# @variable(model, S[1:l] >= 1, Int)
 @variable(model, x[1:L], Bin)
 @variable(model, d[1:M], Int)
 
 @objective(model, Max, sum(d[i] for i=1:M))
 
-
-
 @constraints(model, begin
-    sum(x[j] for j = 1:L) == l
-    [i = 1:M, j = 1:L], d[i] <= x[j]*D[i,j] + ((1-x[j]) * 999) 
+    sum(x[i] for i = 1:L) <= 1
+    [i = 1:M, j = 1:L], d[i] <= x[j] * D[i,j] + (1-x[j]) * maximum(D)
     [i = 1:M], d[i] >= 0
 end)
 
 println()
 
-initial_time = now()
 solve(model)
 
-println(getvalue(x))
-println(getobjbound(model))
+println(getobjectivevalue(model))
 
 
 # @variable(model, )

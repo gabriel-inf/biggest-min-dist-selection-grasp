@@ -4,8 +4,6 @@ using JuMP
 FILE_NAME = "instances/mdmt39.112.A.ins"
 
 
-
-
 # PARSING FILE
 
 f = open(FILE_NAME);
@@ -37,7 +35,7 @@ end
 
 
 
-model = Model(solver=GLPKSolverMIP())
+model = Model(solver=GLPKSolverMIP(tm_lim=600000, out_frq=100))
 
 @variable(model, x[1:L], Bin)
 @variable(model, d[1:M], Int)
@@ -55,16 +53,10 @@ end)
 println()
 
 initial_time = now()
-while(solve(model))
-    println("Testeeee") 
-    current_time = now()
-    if Dates.minute(Dates.Dates.epochms2datetime(current-initial_time)) >= 1
-        println("Partial solution: $(getobjectivevalue(model)).")
-        initial_time = now()
-    end
-end
+solve(model)
 
-println("Sol otima $(getobjectivevalue(model)).")
+println(getvalue(x))
+println(getobjectivebound(model))
 
 
 # @variable(model, )

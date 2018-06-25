@@ -5,7 +5,7 @@ import random
 import itertools
 import datetime
 import time as cronometro
-
+import os
 
 
 INTERACTIONS = 25000
@@ -18,37 +18,42 @@ PROBABILITY = 0.20
 
 
 
-def grasp(D, min_dists, M, L, l, interactions):
-    #Aplica a meta-heurística GRASP para resolver o problema
-
-    
-
+def get_time_reference():
     time = datetime.datetime.now()
     day, hours = str(time).split()
     day = day.split('-')
     hours = hours.split(':')
-
     start = cronometro.time()
+    return time, day, hours, start
 
+
+
+def grasp(D, M, L, l, interactions):
+    #Aplica a meta-heurística GRASP para resolver o problema
+
+    
+    time, day, hours, start = get_time_reference()
     print("Started grasp! {}-{}-{}-{}".format(hours[0], hours[1], day[2], day[1]))
-
-
-    # clear the thing
     open('results/{}-{}-{}-{}.txt'.format(hours[0], hours[1], day[2], day[1]), 'w').close()
+
+    d = []
+    for e in range(L):
+        d.append(evaluate_candidate(e,D))
+
 
 
     last_100 = [0 for _ in range(100)]
-    count = 0
+    
 
     c_interaction = 0
 
     if interactions > 0:
-        best_solution, best_value = random_greedy(D, M, min_dists, L, l, PROBABILITY)
-        best_solution, best_value = local_search(best_solution,D,min_dists , M, L, l)
+        best_solution = []
+        best_value = 0
 
         for k in range(interactions):
-            p_solution, p_value = random_greedy(D, M, min_dists, L, l, PROBABILITY)
-            p_solution, p_value = local_search(p_solution, D,min_dists ,M, L, l)
+            p_solution, p_value = random_greedy(D, M, L, l, PROBABILITY, d)
+            p_solution, p_value = local_search(p_solution, D ,M, L, l)
             if p_value > best_value:
                 best_solution = p_solution[:] 
                 best_value = p_value
@@ -58,128 +63,100 @@ def grasp(D, min_dists, M, L, l, interactions):
             last_100.append("{} & {} & {} \n".format(c_interaction,best_value, best_solution))
             last_100.pop(0)
             print("Iteraction {} - best value: {} - execution time: {}".format(c_interaction, best_value, int(cronometro.time() - start) ))
-            if count == 99:
+            if c_interaction % 1 == 900:
                 print("Iteraction {} - best value: {} - execution time: {}".format(c_interaction, best_value, int(cronometro.time() - start) ))
                 f = open('results/{}-{}-{}-{}.txt'.format(hours[0], hours[1], day[2], day[1]), 'a')
                 for res in last_100:
                     f.write(res)
                 count = 0
 
-            count += 1
+       
 
 
         return best_solution, best_value
     else:
         raise Exception
 
-def value(solution, D, M, min_dists):
+def value(solution, D, M):
     # Returns the value of a solutionm
 
     sol = []
-    for e in solution:
-        sol.append(min_dists[e])
-
+    for m in range(M):
+        sol.append(min_ml(m, solution, D))
     return sum(sol)
 
-def update_candidates(n, L):
-    C = set()
-    while len(C) <  n:
-        C.add(random.randint(0, L-1))
-    return C
+def random_greedy(D, M, L, l, e, d):
 
-
-def random_greedy(D, M, min_dists, L, l, e):
-
+    # começa com um conjunto vazio
     S = set()
-    # Initialize the candidate set: C ← E;
-    C = update_candidates(l,L)
-  
-    evaluation = [tuple([x,min_dists[x]]) for x in C]
+    # inicializa o conjunto de canditos: C ← E;
+    C = set([x for x in range(L)])
+
+    evaluation = [tuple([x, d[x]]) for x in C]
     evaluation.sort(key=lambda tup : tup[1], reverse=True)
 
-    while len(C) > 0:
-        # Select an element s ∈ C with the biggest distance min_dists(s); 
+    while len(S) < l:
 
-        max_index = int(abs(len(C)*e))
-        index = random.randint(0, len(C)-1)
         
+        
+        # Select an element s ∈ C with the biggest distance; 
+        max_index = int(abs(len(C)*e)) 
+        # Select the a candidate from the resticted list
+        index = random.randint(0, len(C)-1)
         s = evaluation[index][0]
         S.add(s)
-        C = update_candidates(len(C)-1, L)
+        C = C - set([s])
 
-        if len(C) > 0:
-            evaluation = [tuple([x,min_dists[x]]) for x in C]
-            evaluation.sort(key=lambda tup : tup[1], reverse=True)
+        evaluation.pop(index)
 
-
-    # # # # # # # build a solution based in e-greedy strategy
-    # # # # # # S = []
-    # # # # # # while len(S) < SOLUCOES_GULOSAS:
-    # # # # # #     s = []
-    # # # # # #     while len(s) < l:
-    # # # # # #         # sorteia vértices de L que serão usados
-    # # # # # #         new_number = random.randint(0, L-1)
-    # # # # # #         if new_number not in s:
-    # # # # # #             s.append(new_number)
-    # # # # # #     S.append(tuple([s,value(s, D, M, min_dists)]))
-    # # # # # # # ordena as soluções encontradas por qualidade
-    # # # # # # S.sort(key=lambda tup : tup[1], reverse=True)
-
-    # # # # # # # Formando a lista de melhores candidatos
-    # # # # # # max_index = int(abs(len(S)*e))
-    # # # # # # rlc = [s for s in S[0:max_index]]
-    # # # # # # result = rlc[random.randint(0,max_index-1)]
-
-    
-    # retorna, de forma aleatoria um dos elementos da lista restrita e a qualidade obtida
     S = list(S)
-    return S, value(S, D, M, min_dists)
+    return S, value(S, D, M)
 
 
-def generate_neighbors(solution, D, min_dists, M, L, l):
-    # gera os vizinhos para o local_search
+def generate_neighbors(S, D, M, L, l):
 
-    neighbors = []
+    print("Tamanho da solução:")
+    print(len(set(S)))
+
     # Gerando os vizinhos
-    current = set(solution)
+    current = set(S)
     possibilities = set([x for x in range(l)])
     
     # print(len(current), len(possibilities))
-
 
     dif = possibilities - current
     dif = list(dif)
     current = list(current)
 
-
-
     # agora, para cada um dos valores utilizados em na solução atual, devo fazer a troca com cada um dos valores da diferença
     # esse processo custará len(solution)*(len(possibilities)-len(solution))
 
+    neighbors = []
     for i in range(len(current)):
         for j in range(len(dif)):
             n = current[:]
             n[i] = dif[j]
             neighbors.append(n)
-        
+    print("Num of neighbors:  {} ".format(len(neighbors)))
+
     # aqui temos os vizinhos, precisamos medir suas qualidades
 
     neighbors_and_quality = []
     for neighbor in neighbors:
-        neighbors_and_quality.append(tuple([neighbor, value(neighbor, D, M, min_dists)]))
+        neighbors_and_quality.append(tuple([neighbor, value(neighbor, D, M)]))
 
     return neighbors_and_quality
 
     
 
 
-def local_search(solution, D, min_dists, M, L, l):
+def local_search(solution, D, M, L, l):
     # apply local search generating
 
     s = solution[:]
-    s_val = value(s, D, M, min_dists)
+    s_val = value(s, D, M)
     while True:
-        n = generate_neighbors(s, D, min_dists, M, L, l)
+        n = generate_neighbors(s, D, M, L, l)
        
         index_max = np.argmax(x[1] for x in n)
         s_tuple = n[index_max]
@@ -229,26 +206,30 @@ def read_all_stdin():
     return content.split()
 
 
+def evaluate_candidate(e, D):
+    M, L = D.shape
+  
+    for m in range(M):
+        max_value = 0
+        if D[m,e] > max_value:
+            max_value = D[m,e]
+    return max_value
+
+def min_ml(m,S, D):
+    min_dist = 9999
+    for s in S: 
+        e = D[m,s]
+        if e < min_dist:
+            min_dist = e
+    return min_dist
+
 def main():
 
     # D é a matriz de adjacência com os valores dos pesos
     M, L, l, D = parse_instance(INSTANCIA_TESTE)
-
-
-    min_dists = []
     
-    for j in range(L):
-        min_temp = 999
-        for m in range(M):
-            n = D[m,j]
-            if n < min_temp:
-                min_temp = n
-        min_dists.append(min_temp)
-
-
-    
-    S, value = grasp(D, min_dists, M, L, l, INTERACTIONS)
-
+    print(D)
+    S, value = grasp(D, M, L, l, INTERACTIONS)
     print("Best solution quality: {} \n Agent: \n {}".format(value, S))
     
 
