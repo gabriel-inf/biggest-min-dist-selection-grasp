@@ -21,18 +21,18 @@ from operator import itemgetter
 
 
 FILE_TO_BEST_SOLUTION = sys.argv[1]
-ITERACTIONS = int(sys.argv[2])
-NUM_VIZINHOS = int(sys.argv[3])
-SOLUCOES_GULOSAS = int(sys.argv[4])
-ALPHA = float(sys.argv[5])
-LOCAL_SEARCH_CRITERIA = int(sys.argv[6])
-NUM_CORES = multiprocessing.cpu_count()
+MINUTES = sys.argv[2]
+NUM_VIZINHOS = 8
+SOLUCOES_GULOSAS = 100
+ALPHA = float(sys.argv[3])
+LOCAL_SEARCH_CRITERIA = 10
+NUM_CORES = 1
 
 
+#           0               1                   2       3
+#python3 ngrasp.py <FILE_TO_BEST_SOLUTION> <MINUTES> <ALPHA>
 
 
-#           0               1                   2                       3           4               5           6
-#python3 ngrasp.py <FILE_TO_BEST_SOLUTION> <ITERACTIONS_GRASP> <NUM_VIZINHOS> <SOLUCOES_GULOSAS> <ALPHA> <LOCAL_SEARCH_CRITERIA>
 
 # -------- ----------GRASP --------- ---------------
 def grasp(d, l, inst, interactions):
@@ -52,7 +52,8 @@ def grasp(d, l, inst, interactions):
    
     f = 0
     S = []
-    for it in range(interactions):
+    it = 0
+    while (ronometro.time()-start)/60 < MINUTES:
         s = greedy_randomized(d, l, ALPHA)
         s = local_search(s, l, d)
         f_ = evaluate(s, d)
@@ -62,6 +63,7 @@ def grasp(d, l, inst, interactions):
             logging.info('{} - {} - {}'.format(it, f, int(cronometro.time()-start)))
         print("it. {}: bv: {} - seconds execution: {}...".format(it, f, int(cronometro.time()-start)))
     logging.info("TOTAL TIME: {} ".format(int(cronometro.time()-start)))
+        it += 1
     return S, f
 
 
