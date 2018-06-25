@@ -7,9 +7,9 @@ import datetime
 import time as cronometro
 import os
 from random import shuffle
-
+from multiprocessing import Pool
+import multiprocessing
 import logging
-
 from operator import itemgetter
 
 # FILE_TO_BEST_SOLUTION ='results/la_cu_caratia.txt'
@@ -20,31 +20,29 @@ from operator import itemgetter
 # LOCAL_SEARCH_CRITERIA = 20
 
 
-FILE_TO_BEST_SOLUTION ='results/la_cu_caratia.txt'
-ITERACTIONS = 10000
-NUM_VIZINHOS = 100
-SOLUCOES_GULOSAS = 100
-ALPHA = 0.1
-LOCAL_SEARCH_CRITERIA = 1
-
-
-INSTANCIA_TESTE = '/home/gabriel/git/biggest-min-dist-selection-grasp/instances/mdmt39.112.A.ins'
-
+FILE_TO_BEST_SOLUTION = sys.argv[1]
+ITERACTIONS = int(sys.argv[2])
+NUM_VIZINHOS = int(sys.argv[3])
+SOLUCOES_GULOSAS = int(sys.argv[4])
+ALPHA = float(sys.argv[5])
+LOCAL_SEARCH_CRITERIA = int(sys.argv[6])
+NUM_CORES = multiprocessing.cpu_count()
 
 
 
 
+#           0               1                   2                       3           4               5           6
 #python3 ngrasp.py <FILE_TO_BEST_SOLUTION> <ITERACTIONS_GRASP> <NUM_VIZINHOS> <SOLUCOES_GULOSAS> <ALPHA> <LOCAL_SEARCH_CRITERIA>
 
 # -------- ----------GRASP --------- ---------------
-def grasp(d, l):
+def grasp(d, l, inst, interactions):
 
     start = cronometro.time()
 
     #-------------------------------LOGS-----------------------------------------------------
     logging.basicConfig(filename='results/'+str(datetime.datetime.now()),level=logging.DEBUG)
-    logging.info("GRASP ITERATIONS: {} ".format(ITERACTIONS))
-    logging.info("Instância: {} ".format(INSTANCIA_TESTE))
+    logging.info("Instância: {} ".format(inst))
+    logging.info("GRASP ITERATIONS: {} ".format(interactions))
     logging.info("SOLUCOES_GULOSAS: {} ".format(SOLUCOES_GULOSAS))
     logging.info("ALPHA: {} ".format(ALPHA))
     logging.info("LOCAL_SEARCH_CRITERIA: {} ".format(LOCAL_SEARCH_CRITERIA))
@@ -54,16 +52,15 @@ def grasp(d, l):
    
     f = 0
     S = []
-    for it in range(ITERACTIONS):
+    for it in range(interactions):
         s = greedy_randomized(d, l, ALPHA)
         s = local_search(s, l, d)
         f_ = evaluate(s, d)
         if f_ > f:
             f = f_
             S[:] = s[:]
-        print("it. {}: bv: {} - seconds: {}".format(it, f, int(cronometro.time()-start)))
-        logging.info('{} - {} - {}'.format(it, f, int(cronometro.time()-start)))
-
+            logging.info('{} - {} - {}'.format(it, f, int(cronometro.time()-start)))
+        print("it. {}: bv: {} - seconds execution: {}...".format(it, f, int(cronometro.time()-start)))
     logging.info("TOTAL TIME: {} ".format(int(cronometro.time()-start)))
     return S, f
 
@@ -84,15 +81,6 @@ def greedy_randomized(d, l, alpha):
         s = l_elements[:l] 
         f = evaluate(s, d)       
         list_of_solutions.append([f, s])
-
-    # # # while len(list_of_solutions) < SOLUCOES_GULOSAS:
-    # # #     shuffle(l_elements)
-    # # #     s = l_elements[:l]
-    # # #     f = evaluate(s, d)
-    # # #     if f > best: 
-    # # #         best = f
-    # # #         best_sol = s[:]
-    # # #         list_of_solutions.append([best, best_sol])
             
     index_max = int(math.floor(len(list_of_solutions)*alpha))
    
@@ -135,7 +123,6 @@ def local_search(S, l, d):
         if f > best_sol_value:
             best_sol[:] = S_[:]
             best_sol_value = f
-
 
     return best_sol
 
@@ -209,15 +196,32 @@ def main():
     
 
     # D é a matriz de adjacência com os valores dos pesos
-    M, L, l, d = parse_instance(INSTANCIA_TESTE)
     
-    best_sol, best_value = grasp(d, l)
+    instancia = input()
+    
+    M, L, l, d = parse_instance(instancia)
+
+    it_process = int(abs(math.ceil(ITERACTIONS/NUM_CORES)))
+
+    iteractions_list = [[d,l,instancia,it_process] for _ in range(NUM_CORES)]
+
+    sol_list = []
+    with Pool(NUM_CORES) as p:
+        sol_list = p.starmap(grasp, iteractions_list)
+    
+    index = np.argmax([x[1] for x in sol_list])
+
+
+
+    best_sol, best_value = sol_list[index]
     print("Best solution quality: {} \n Agent: \n {}".format(best_value, best_sol))
     logging.info("Best solution quality: {} \n Agent: \n {}".format(best_value, best_sol))
     
 
-    f=open(BEST)
-
+    f=open(FILE_TO_BEST_SOLUTION, 'w')
+    f.write(str(best_value) + '\n')
+    f.write(str(best_sol))
+    f.close
 
 if __name__ == "__main__":
     main()
