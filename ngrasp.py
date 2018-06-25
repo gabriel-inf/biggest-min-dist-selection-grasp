@@ -53,7 +53,7 @@ def grasp(d, l, inst, interactions):
     f = 0
     S = []
     it = 0
-    while (ronometro.time()-start)/60 < MINUTES:
+    while (cronometro.time()-start)/60 < MINUTES:
         s = greedy_randomized(d, l, ALPHA)
         s = local_search(s, l, d)
         f_ = evaluate(s, d)
