@@ -13,7 +13,7 @@ import logging
 from operator import itemgetter
 
 # FILE_TO_BEST_SOLUTION ='results/la_cu_caratia.txt'
-# ITERACTIONS = 10000
+ITERACTIONS = 10000000
 # NUM_VIZINHOS = 8
 # SOLUCOES_GULOSAS = 100
 # ALPHA = 0.1
@@ -204,19 +204,18 @@ def main():
     
     M, L, l, d = parse_instance(instancia)
 
-    it_process = int(abs(math.ceil(ITERACTIONS/NUM_CORES)))
+    # it_process = int(abs(math.ceil(ITERACTIONS/NUM_CORES)))
 
-    iteractions_list = [[d,l,instancia,it_process] for _ in range(NUM_CORES)]
+    # iteractions_list = [[d,l,instancia,it_process] for _ in range(NUM_CORES)]
 
-    sol_list = []
-    with Pool(NUM_CORES) as p:
-        sol_list = p.starmap(grasp, iteractions_list)
+    # sol_list = []
+    # with Pool(NUM_CORES) as p:
+    #     sol_list = p.starmap(grasp, iteractions_list)
     
-    index = np.argmax([x[1] for x in sol_list])
+    # index = np.argmax([x[1] for x in sol_list])
+    # best_sol, best_value = sol_list[index]
 
-
-
-    best_sol, best_value = sol_list[index]
+    best_sol, best_value = grasp(d,l,instancia,ITERACTIONS)
     print("Best solution quality: {} \n Agent: \n {}".format(best_value, best_sol))
     logging.info("Best solution quality: {} \n Agent: \n {}".format(best_value, best_sol))
     
