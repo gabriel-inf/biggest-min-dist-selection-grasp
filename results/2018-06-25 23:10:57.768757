@@ -1,0 +1,18 @@
+INFO:root:Instância: /home/gabriel/git/biggest-min-dist-selection-grasp/instances/mdmt40.56.A.ins 
+INFO:root:SOLUCOES_GULOSAS: 100 
+INFO:root:ALPHA: 0.1 
+INFO:root:LOCAL_SEARCH_CRITERIA: 10 
+INFO:root:NUM_VIZINHOS: 8 
+INFO:root:0.1 - 0 - 4973 - 6
+INFO:root:0.1 - 1 - 5051 - 12
+INFO:root:0.1 - 3 - 5064 - 24
+INFO:root:0.1 - 5 - 5121 - 40
+INFO:root:0.1 - 7 - 5193 - 56
+INFO:root:TOTAL TIME: 63 
+INFO:root:Instância: /home/gabriel/git/biggest-min-dist-selection-grasp/instances/mdmt40.225.B.ins 
+INFO:root:SOLUCOES_GULOSAS: 100 
+INFO:root:ALPHA: 0.1 
+INFO:root:LOCAL_SEARCH_CRITERIA: 10 
+INFO:root:NUM_VIZINHOS: 8 
+INFO:root:0.1 - 0 - 3156 - 13
+INFO:root:TOTAL TIME: 61 

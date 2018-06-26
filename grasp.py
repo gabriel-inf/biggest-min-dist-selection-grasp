@@ -250,7 +250,7 @@ def main():
 
 
     # PARA CADA INSTANCIA, RODAR O GRASP 3 VEZES
-    cores = multiprocessing.cpu_count()
+    
 
 
     
@@ -280,12 +280,11 @@ def main():
     f.close
 
 
-
 def run_instances(instances):
     """ Paraleliza a execução do teste para todas as instancias """
-
+    cores = multiprocessing.cpu_count()
     with Pool(cores) as p:
-        sol = Pool.mapstar(grasp, instances)
+        sol = p.starmap(grasp, instances)
     return [x[1] for x in sol]
 
 
