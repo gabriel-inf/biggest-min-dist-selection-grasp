@@ -1,0 +1,2 @@
+Best solution: (alpha = 30)
+[3797, 3848, 3847]

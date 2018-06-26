@@ -1,0 +1,2 @@
+Where goes the best alpha found!!! 
+alpha=10%

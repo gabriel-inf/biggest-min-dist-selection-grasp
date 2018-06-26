@@ -1,0 +1,2 @@
+Best solutions: (alpha = 10)
+[3853, 3870, 3913]
