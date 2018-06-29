@@ -1,0 +1,157 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% How to use writeLaTeX: 
+%
+% You edit the source code here on the left, and the preview on the
+% right shows you the result within a few seconds.
+%
+% Bookmark this page and share the URL with your co-authors. They can
+% edit at the same time!
+%
+% You can upload figures, bibliographies, custom classes and
+% styles using the files menu.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[12pt]{article}
+\usepackage[portuguese, ruled, linesnumbered]{algorithm2e}
+\usepackage{sbc-template}
+
+\usepackage{graphicx,url}
+
+%\usepackage[brazil]{babel}   
+\usepackage[utf8]{inputenc}  
+
+\usepackage{amssymb}
+
+\sloppy
+
+\title{INF05010 Otimização Combinatória\\ Trabalho Final:\\Algoritmo de GRASP para o Problema de Seleção de Maior 
+Distância Mínima Total
+}
+
+\author{Gabriel Stepien\inst{1}}
+
+
+\address{Instituto de Informática -- Universidade Federal do Rio Grande do Sul
+  (UFRGS)\\
+  Caixa Postal 15.064 -- 91.501-970 -- Porto Alegre -- RS -- Brasil\\ 
+  \email{gabriel.stepien@inf.ufrgs.br}
+}
+
+\begin{document} 
+
+\maketitle
+
+\section{Introdução}
+
+O objetivo do trabalho foi implementar uma meta-heurística para a resolução do problema de seleção de maior distância mínima total (MDMT). A mata-heurística utilizada foi GRASP \textit{(Greedy Randomized Adaptive Search Procedure)} cujos detalhes são expandidos na seção 5. 
+
+O problema de seleção de maior distância mínima total é definido como segue: dado um grafo bipartido $G=(M \dot{\cup} L, A)$ com distâncias $d_a$ nas arestas $a \in A$, e uma constante $l \leq |L|$, deseja-se obter uma seleção $S \subseteq L $ com $|S| = l$. Para cada solução $S$ a distância mínima de um elemento $m \in M$ é dada por $d_m = \min_{\forall s \in S} D_{ms}$ para todo elemento selecionado. O objetivo é encontrar o maior valor da soma das distâncias mínimas $\sum_{m \in M}d_m$.
+
+
+\section{Formulação do problema inteiro} \label{sec:firstpage}
+
+\paragraph{Variáveis:} 
+\begin{itemize}
+\item $x_i \in Bin, \forall i \in L$, tal que $x_i = 1$ se $i \in S $, $x_i = 0$ caso contrário;
+\item $d_m$ é o valor da distância mínima calculada para o vértice $m$ com a seleção $S$;
+\item $D$ é uma matriz $M \times L$ onde $D_{ij}$ representa a distância do vértice $m\in M$ para o vértice $s \in L$.
+\end{itemize}
+
+\paragraph{Função Objetivo:}
+
+\[ \max \sum_{m \in M}d_m \]
+
+\paragraph{Restrições.}
+\begin{table}[htb]
+\setlength{\tabcolsep}{20pt}
+\centering
+\label{my-label}
+\begin{tabular}{lrl}
+$\sum_{i \in L}x_i = l,$                       & \multicolumn{1}{l}{}                & $(1)$  \\
+$d_m \leq x_i D_{mi} + (1-x_i)\inf $           & $\forall m \in M, \forall i \in L,$ & $(2)$ \\
+$d_m \geq 0$                                   & $\forall m \in M$                   & $(3)$ \\
+$d_m \in \mathbb{Z} $                                    & $\forall m \in M$                   & $(4)$ \\
+$x_i \in Bin$                                  & $\forall i \in L$                   & $(5)$
+\end{tabular}
+\end{table}
+
+A restrição (1) é responsável por manter o tamanho da solução no valor desejado de $l$. Já a restrição (2) faz a seleção dos mínimos para cada vértice $m \in M$ de acordo com a solução $S$. As restrições (1), (2) e (3) são triviais.
+
+\section{Elementos do GRASP}
+
+\begin{itemize}
+\item Solução: permutação $p = (p_1, p_2, ..., p_n)$ com $n=1:l$, tal que  $ \forall e \in p, e\in L $;
+\end{itemize}
+
+\section{Parâmetros}
+
+Para o algoritmo de GRASP, precisamos definir alguns parâmetros a fim de explorar as suas características. 
+
+\begin{itemize}
+\item Fator de randomização ($\alpha $): Número entre 0 e 1 utilizado para restringir a lista de melhores resultados do algoritmo guloso. A solução parcial resultado do algoritmo guloso randomizado é uma escolha aleatória entre os elementos (soluções) dessa lista;
+\item Critério de parada: Tempo $t$ em minutos definido pelo usuário para rodar as iterações do GRASP;
+\item Soluções gulosas-randomizadas: Número $n \in \mathbb{Z} $ que define quantas soluções são avaliadas no na parte gulosa-randomizada;
+\item Número de vizinhos para a busca-local: Número de vizinhos que serão gerados a cada iteração da busca local;
+\item Número de tentativas para a busca local: Parâmetro que define quantas vezes o algoritmo de busca local tenta evoluir a solução recebida do algoritmo guloso-randomizado. 
+\end{itemize}
+
+Os parâmetros, com exceção do fator de randomização e do tempo limite, foram definidos via código. 
+
+
+
+\section{O algoritmo}
+
+\begin{algorithm}[H]
+   \SetAlgoLined
+   \Entrada{$\alpha$ e o tempo limite} 
+   \Saida{Solução para o problema}
+   \Inicio{
+
+   $s = []$\\
+   $bestValue = 0$\\
+    \Enqto{tempo limite não atingido}{
+   $s' = GulosoRandomizado(\alpha)$
+   \\
+   $s' = BuscaLocal(\alpha)$
+   \\
+   \uIf{bestValue $\leq$ f(s')}{
+    $bestValue = f(s')$\;
+    $s = s'$\;
+   }
+     }
+   }
+   \Retorna{$\sigma(S)$}
+   \label{alg1}
+   \caption{\textsc{GRASP}}
+ \end{algorithm}
+
+\subsection{Geração da solução inicial} Para cada iteração o algorítimo utiliza um método guloso-randomizado para gerar boas soluções iniciais. O processo é repetido a cada nova iteração do algoritmo GRASP. Por esse fato podemos dizer que ele possui a característica de ser \textit{multi-start}. 
+
+A solução inicial é construída a partir de um número definido de vizinhos gerados aleatoriamente. Esses vizinhos são ordenados por melhor solução para o problema e, em seguida, é sorteado um elemento a partir dos alpha melhores.
+
+\subsection{Evolução da solução inicial} O método, após ter uma solução inicial gerada pelo algoritmo randômico-guloso, tenta evoluir essa solução utilizando a abordagem de busca local. A geração dos vizinhos para o caminhamento no espaço de soluções é feita a partir de permutações na solução dada como entrada para o método.
+
+\subsection{Iterações GRASP} O algoritmo, a cada iteração, intercala entre gerar uma nova solução a partir do método guloso-randomizado e tentar melhorar essa solução a partir do método de busca local. A repetição dessas etapas deve fazer com que a busca por uma solução fuja dos máximos locais, para esse problema, por exemplo. 
+
+\section{Implementação}
+\subsection{Plataforma de implementação}
+O trabalho foi implementado e estado em um computador cujo sistema operacional é Ubuntu 16.04 LTS (64-bit), com um processador Intel® Core™ i7-3632QM com frequência de 2.20GHz, 4 núcleos físicos com 8 \textit{threads} cada, cache de 6MB e 6GB de memória RAM. A linguagem de programação utilizada foi Python 3. 
+\subsection{Estruturas de dados}
+Para a representação da matriz que guarda as distâncias entre os vértices foi usado uma matriz da biblioteca numpy de tamanho $M \times L$. Cada solução é representada por uma lista.
+
+\subsection{Cálculo do valor de cada solução}
+O valor de cada solução é calculado percorrendo a matriz que contém as distâncias. Para cada $m \in M$ calcula a distância mínima para cada elemento $s \in S$. De fato, essa solução precisa avaliar todos os vértices do conjunto M com os vértices do conjunto da solução. São feitas $M \times l$ iterações. 
+
+\subsection{Paralelização}
+Por se um método \textit{multi-start}, podemos concluir que o GRASP é paralelizável. O laço do seguimento de código não possui dependências de 
+
+
+\section{Referências}
+
+
+
+\bibliographystyle{sbc}
+\bibliography{sbc-template}
+
+\end{document}

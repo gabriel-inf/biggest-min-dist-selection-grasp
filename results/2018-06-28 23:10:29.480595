@@ -1,0 +1,12 @@
+INFO:root:Instância: /home/gabriel/git/biggest-min-dist-selection-grasp/instances/mdmt39.112.A.ins 
+INFO:root:SOLUCOES_GULOSAS: 100 
+INFO:root:ALPHA: 0.26 
+INFO:root:LOCAL_SEARCH_CRITERIA: 10 
+INFO:root:NUM_VIZINHOS: 8 
+INFO:root:0 - 5772 - 0
+INFO:root:1 - 5799 - 0
+INFO:root:20 - 5814 - 4
+INFO:root:80 - 5836 - 15
+INFO:root:152 - 5845 - 29
+INFO:root:504 - 5859 - 98
+INFO:root:618 - 5862 - 121

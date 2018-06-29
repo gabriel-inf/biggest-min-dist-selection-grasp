@@ -1,0 +1,5 @@
+Best value: 
+
+alpha = 0.5 -> 4908
+alpha = 0.4 ->5288
+alpha = 0.255 5853
