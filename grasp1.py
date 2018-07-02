@@ -43,9 +43,6 @@ def grasp(d, l, inst):
 
     min_dist_m = calculate_min_distances(d)
     min_dists_sorted = sorted(min_dist_m, key=itemgetter(1), reverse=True)[:]
-
-
-
    
     f = 0
     S = []
@@ -112,8 +109,6 @@ def local_search(S, l, d, min_dists):
         best_neighbor = N[best_index][0]
         bn_value = N[best_index][1]
 
-
-
     return N[best_index][0]
 
 
@@ -128,29 +123,19 @@ def generate_neighbors(S,L,d,min_dists):
     possibles = list(possible)
     
     N = []
+    count = 0
     for i in range(l):
-        for new_element in possibles:
-            
+        for new_element in possibles:            
             S_ = S[:]
             S_[i] = new_element
    
             n_value = min(s_value, get_element_min_dist(new_element, min_dists))
             N.append(tuple([S_, n_value]))
+            if count == 0:
+                print(n_value, s_value)
+            count += 1
+            
     
-
-
-
-    
-    # N = []
-    # while len(N) < NUM_VIZINHOS:
-    #     index = random.randint(0,len(S_)-1)
-    #     n = random.randint(0,L-1)
-    #     while n in S_:
-    #         n = random.randint(0,L-1)
-    #     if (n >= 450):
-    #         break
-    #     S_[index] = n
-    #     N.append(S_)
     return N 
 
 
@@ -159,7 +144,6 @@ def generate_neighbors(S,L,d,min_dists):
 
 def evaluate(S, d):
     """Função objetivo"""
-  
     M, L = d.shape
     result = 0
     for m in range(M):
@@ -174,14 +158,28 @@ def calculate_min_distances(d):
     """ Calcula as distâncias mínimas e retorna uma lista com (l,dist) ordanada """
     M, L = d.shape
     min_dists_vs_l = []
-
     for l in range(L):
         min_dist = np.inf
         for m in range(M):
             min_dist = min(min_dist, d[m,l])
-        min_dists_vs_l.append(tuple([l, min_dist]))   
-    
+        min_dists_vs_l.append(tuple([l, min_dist]))     
     return min_dists_vs_l
+# -----------------------------------------------
+
+# def update_sol(S,d, min_dists, sol_value):
+#     """ Função para facilitar a função objetivo """
+#     M, L = d.shape
+#     best_m = []
+#     result = 0
+#     for m in range(M):
+#         dm = math.inf
+#         for e in S:
+#             dm = min(dm, d[m,e])
+#         result += dm
+#         best_m.append(dm)
+#     return best_m
+
+        
 
 # -------------------------------------------------
 
